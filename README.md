@@ -57,12 +57,14 @@ used by the MCP client:
 
 ```bash
 uv run mcp --duckduckgo --host 0.0.0.0 --port 8001 \
-  --allowed-host 192.168.0.26:8001
+  --allowed-host 192.168.0.26:8001 \
+  --allowed-origin http://192.168.0.12:*
 ```
 
 Use the server computer's LAN address and port in `--allowed-host`; it must
 match the MCP URL configured in the client. Add `--allowed-host` again for any
-additional permitted host header.
+additional permitted host header. Use the Llama UI computer's LAN address in
+`--allowed-origin`; `:*` permits any local UI port on that computer.
 
 ## Tooling
 

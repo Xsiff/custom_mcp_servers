@@ -36,6 +36,8 @@ def test_launcher_accepts_duckduckgo_http_options() -> None:
             "8000",
             "--allowed-host",
             "127.0.0.1:8000",
+            "--allowed-origin",
+            "http://127.0.0.1:3000",
         ]
     )
 
@@ -43,6 +45,7 @@ def test_launcher_accepts_duckduckgo_http_options() -> None:
     assert arguments.host == "127.0.0.1"
     assert arguments.port == 8000
     assert arguments.allowed_host == ["127.0.0.1:8000"]
+    assert arguments.allowed_origin == ["http://127.0.0.1:3000"]
 
 
 def test_duckduckgo_http_mode_allows_the_configured_host(
@@ -65,6 +68,8 @@ def test_duckduckgo_http_mode_allows_the_configured_host(
             "8001",
             "--allowed-host",
             "192.168.0.26:8001",
+            "--allowed-origin",
+            "http://192.168.0.12:*",
         ]
     )
 
@@ -79,6 +84,8 @@ def test_duckduckgo_http_mode_allows_the_configured_host(
         "8001",
         "--allowed-hosts",
         "192.168.0.26:8001",
+        "--allowed-origins",
+        "http://192.168.0.12:*",
     ]
 
 

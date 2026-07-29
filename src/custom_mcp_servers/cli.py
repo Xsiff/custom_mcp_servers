@@ -59,6 +59,13 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="HOST[:PORT]",
         help="allowed Host header for DuckDuckGo HTTP mode; repeat as needed",
     )
+    parser.add_argument(
+        "--allowed-origin",
+        action="append",
+        default=[],
+        metavar="ORIGIN",
+        help="allowed Origin header for DuckDuckGo HTTP mode; repeat as needed",
+    )
     return parser
 
 
@@ -74,8 +81,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         parser.error("--host and --port must be supplied together")
     if arguments.allowed_host and arguments.server != "duckduckgo":
         parser.error("--allowed-host is only available for DuckDuckGo")
+    if arguments.allowed_origin and arguments.server != "duckduckgo":
+        parser.error("--allowed-origin is only available for DuckDuckGo")
     if arguments.allowed_host and arguments.host is None:
         parser.error("--allowed-host requires --host and --port")
+    if arguments.allowed_origin and arguments.host is None:
+        parser.error("--allowed-origin requires --host and --port")
 
     command = list(SERVER_COMMANDS[arguments.server])
     if arguments.host is not None:
@@ -92,6 +103,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             )
             if arguments.allowed_host:
                 command.extend(["--allowed-hosts", *arguments.allowed_host])
+            if arguments.allowed_origin:
+                command.extend(["--allowed-origins", *arguments.allowed_origin])
         else:
             command = [
                 "uvx",
