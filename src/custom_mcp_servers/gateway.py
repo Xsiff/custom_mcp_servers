@@ -50,6 +50,22 @@ def _response(status: int, reason: str, body: bytes) -> bytes:
     ).encode() + body
 
 
+def _cors_headers(origin: str | None, requested: str | None = None) -> bytes:
+    if origin is None:
+        return b""
+    requested_headers = (
+        requested or "Content-Type, Mcp-Session-Id, Last-Event-ID"
+    )
+    return (
+        f"Access-Control-Allow-Origin: {origin}\r\n"
+        "Access-Control-Allow-Credentials: true\r\n"
+        "Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS\r\n"
+        f"Access-Control-Allow-Headers: {requested_headers}\r\n"
+        "Access-Control-Expose-Headers: Mcp-Session-Id\r\n"
+        "Vary: Origin\r\n"
+    ).encode("latin-1")
+
+
 class Gateway:
     def __init__(self, config: AppConfig) -> None:
         self.config = config
@@ -135,6 +151,20 @@ class Gateway:
                 )
                 await writer.drain()
                 return
+            if method.upper() == "OPTIONS":
+                response = (
+                    b"HTTP/1.1 204 No Content\r\n"
+                    + _cors_headers(
+                        origin,
+                        _header_value(
+                            headers, "access-control-request-headers"
+                        ),
+                    )
+                    + b"Content-Length: 0\r\nConnection: close\r\n\r\n"
+                )
+                writer.write(response)
+                await writer.drain()
+                return
             length = int(_header_value(headers, "content-length") or "0")
             body = await reader.readexactly(length) if length else b""
             await self._forward(method, path, headers, body, writer)
@@ -180,6 +210,14 @@ class Gateway:
         )
         upstream.write(request + b"\r\n" + body)
         await upstream.drain()
+        response_headers = await reader.readuntil(b"\r\n\r\n")
+        origin = _header_value(headers, "origin")
+        if origin is not None:
+            response_headers = (
+                response_headers[:-4] + _cors_headers(origin) + b"\r\n"
+            )
+        writer.write(response_headers)
+        await writer.drain()
         while chunk := await reader.read(65536):
             writer.write(chunk)
             await writer.drain()
