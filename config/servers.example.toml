@@ -1,0 +1,23 @@
+# Copy this file to config/servers.toml and replace the local addresses.
+
+[gateway]
+bind_host = "192.168.1.20"
+port = 8000
+proxy_port = 18000
+allowed_hosts = ["192.168.1.20:8000", "127.0.0.1:8000"]
+allowed_origins = ["http://192.168.1.10:3000", "http://127.0.0.1:3000"]
+
+[[servers]]
+name = "duckduckgo"
+enabled = true
+command = ["uvx", "duckduckgo-mcp-server==0.1.1"]
+
+[[servers]]
+name = "time"
+enabled = true
+command = ["uvx", "--with", "mcp<2", "mcp-server-time==2025.1.17"]
+
+[[servers]]
+name = "fetch"
+enabled = true
+command = ["uvx", "--with", "mcp<2", "mcp-server-fetch==2025.1.17"]

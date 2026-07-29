@@ -1,1 +1,2 @@
 include scripts/mcp
+include config/servers.example.toml

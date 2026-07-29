@@ -25,7 +25,45 @@ uvx duckduckgo-mcp-server --help
 Each server communicates over standard input/output, so it will appear to wait
 when launched without a client; that is expected.
 
-### Launcher command
+### Gateway setup
+
+Copy the committed template, then edit the ignored machine-local file:
+
+```bash
+cp config/servers.example.toml config/servers.toml
+```
+
+Set `gateway.bind_host` to `0.0.0.0` (all interfaces) or a specific interface,
+set the server's LAN address in `allowed_hosts`, and add the Llama UI origin to
+`allowed_origins`. The bind address controls where the process listens; clients
+must use the concrete LAN IP, never `0.0.0.0`. Port-forwarding this unauthenticated
+v1 gateway is unsupported.
+
+Inspect the enabled registry without starting anything:
+
+```bash
+uv run mcp list --config config/servers.toml
+```
+
+Start the gateway:
+
+```bash
+uv run mcp serve --config config/servers.toml
+```
+
+Configure Llama with the named endpoints printed by `list`, for example:
+
+```text
+http://192.168.1.20:8000/servers/duckduckgo/mcp
+http://192.168.1.20:8000/servers/time/mcp
+http://192.168.1.20:8000/servers/fetch/mcp
+```
+
+To add a stdio MCP tool, add one enabled `[[servers]]` entry with a unique
+name and explicit command to `config/servers.toml`; launcher code does not need
+to change.
+
+### Direct launcher command
 
 After `uv sync --dev`, use the project's launcher to start one server:
 

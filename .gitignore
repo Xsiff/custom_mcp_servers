@@ -2,6 +2,7 @@
 .uv-cache/
 .pytest_cache/
 .ruff_cache/
+config/servers.toml
 .coverage
 .coverage.*
 __pycache__/
