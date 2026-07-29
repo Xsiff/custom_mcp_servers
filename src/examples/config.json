@@ -2,11 +2,16 @@
   "mcpServers": {
     "time": {
       "command": "uvx",
-      "args": ["mcp-server-time", "--local-timezone=America/Chicago"]
+      "args": [
+        "--with",
+        "mcp<2",
+        "mcp-server-time",
+        "--local-timezone=America/Chicago"
+      ]
     },
     "fetch": {
       "command": "uvx",
-      "args": ["mcp-server-fetch"]
+      "args": ["--with", "mcp<2", "mcp-server-fetch"]
     },
     "ddg-search": {
       "command": "uvx",
