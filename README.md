@@ -52,6 +52,18 @@ DuckDuckGo uses its native Streamable HTTP mode. Time and fetch are stdio-only
 upstream, so the launcher uses an MCP 1.x-compatible local proxy to expose
 them over HTTP. Do not port-forward these ports or bind them to a public host.
 
+When DuckDuckGo is accessed through a LAN IP, explicitly allow the host header
+used by the MCP client:
+
+```bash
+uv run mcp --duckduckgo --host 0.0.0.0 --port 8001 \
+  --allowed-host 192.168.0.26:8001
+```
+
+Use the server computer's LAN address and port in `--allowed-host`; it must
+match the MCP URL configured in the client. Add `--allowed-host` again for any
+additional permitted host header.
+
 ## Tooling
 
 This repo is set up around `uv` for environment and dependency management.

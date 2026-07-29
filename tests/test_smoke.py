@@ -28,12 +28,58 @@ def test_launcher_rejects_multiple_servers() -> None:
 
 def test_launcher_accepts_duckduckgo_http_options() -> None:
     arguments = build_parser().parse_args(
-        ["--duckduckgo", "--host", "127.0.0.1", "--port", "8000"]
+        [
+            "--duckduckgo",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8000",
+            "--allowed-host",
+            "127.0.0.1:8000",
+        ]
     )
 
     assert arguments.server == "duckduckgo"
     assert arguments.host == "127.0.0.1"
     assert arguments.port == 8000
+    assert arguments.allowed_host == ["127.0.0.1:8000"]
+
+
+def test_duckduckgo_http_mode_allows_the_configured_host(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    launched: list[str] = []
+
+    def fake_execvp(program: str, arguments: list[str]) -> None:
+        assert program == "uvx"
+        launched.extend(arguments)
+
+    monkeypatch.setattr("custom_mcp_servers.cli.os.execvp", fake_execvp)
+
+    main(
+        [
+            "--duckduckgo",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8001",
+            "--allowed-host",
+            "192.168.0.26:8001",
+        ]
+    )
+
+    assert launched == [
+        "uvx",
+        "duckduckgo-mcp-server",
+        "--transport",
+        "streamable-http",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8001",
+        "--allowed-hosts",
+        "192.168.0.26:8001",
+    ]
 
 
 def test_time_http_mode_uses_the_stdio_proxy(
