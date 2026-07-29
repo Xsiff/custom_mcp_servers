@@ -214,7 +214,10 @@ class Gateway:
         origin = _header_value(headers, "origin")
         if origin is not None:
             response_headers = (
-                response_headers[:-4] + _cors_headers(origin) + b"\r\n"
+                response_headers[:-4]
+                + b"\r\n"
+                + _cors_headers(origin)
+                + b"\r\n"
             )
         writer.write(response_headers)
         await writer.drain()
