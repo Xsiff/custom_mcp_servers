@@ -11,7 +11,7 @@ def build_command(
     allowed_hosts: list[str],
     allowed_origins: list[str],
 ) -> list[str]:
-    command = ["uvx", "duckduckgo-mcp-server"]
+    command = ["uvx", "--with", "mcp==1.29.0", "duckduckgo-mcp-server"]
     if host is None:
         if allowed_hosts or allowed_origins:
             raise ValueError("HTTP allow-lists require --host and --port")
@@ -35,7 +35,7 @@ def build_command(
 
 SPEC = ServerSpec(
     name="duckduckgo",
-    command=("uvx", "duckduckgo-mcp-server"),
+    command=("uvx", "--with", "mcp==1.29.0", "duckduckgo-mcp-server"),
     flags=("--duckduckgo-mcp-server", "--duckduckgo"),
     description="launch DuckDuckGo",
     command_builder=build_command,

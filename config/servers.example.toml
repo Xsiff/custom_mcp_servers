@@ -10,7 +10,7 @@ allowed_origins = ["http://192.168.1.10:3000", "http://127.0.0.1:3000"]
 [[servers]]
 name = "duckduckgo"
 enabled = true
-command = ["uvx", "duckduckgo-mcp-server==0.1.1"]
+command = ["uvx", "--with", "mcp==1.29.0", "duckduckgo-mcp-server==0.1.1"]
 
 [[servers]]
 name = "time"

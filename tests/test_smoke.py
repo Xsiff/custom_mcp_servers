@@ -76,6 +76,8 @@ def test_duckduckgo_http_mode_allows_the_configured_host(
 
     assert launched == [
         "uvx",
+        "--with",
+        "mcp==1.29.0",
         "duckduckgo-mcp-server",
         "--transport",
         "streamable-http",
