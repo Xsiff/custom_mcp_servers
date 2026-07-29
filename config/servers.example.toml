@@ -15,7 +15,7 @@ command = ["uvx", "--with", "mcp==1.29.0", "duckduckgo-mcp-server==0.1.1"]
 [[servers]]
 name = "time"
 enabled = true
-command = ["uvx", "--with", "mcp<2", "mcp-server-time==2025.1.17"]
+command = ["uvx", "--with", "mcp<2", "mcp-server-time==2025.7.1"]
 
 [[servers]]
 name = "fetch"
