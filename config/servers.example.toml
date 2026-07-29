@@ -21,3 +21,19 @@ command = ["uvx", "--with", "mcp<2", "mcp-server-time==2025.1.17"]
 name = "fetch"
 enabled = true
 command = ["uvx", "--with", "mcp<2", "mcp-server-fetch==2025.1.17"]
+
+[[servers]]
+name = "adder"
+enabled = true
+command = [
+  "uv",
+  "run",
+  "--project",
+  ".",
+  "--no-sync",
+  "--with",
+  "mcp==1.29.0",
+  "python",
+  "-m",
+  "custom_mcp_servers.servers.adder.server",
+]

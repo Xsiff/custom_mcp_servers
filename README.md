@@ -57,6 +57,7 @@ Configure Llama with the named endpoints printed by `list`, for example:
 http://192.168.1.20:8000/servers/duckduckgo/mcp
 http://192.168.1.20:8000/servers/time/mcp
 http://192.168.1.20:8000/servers/fetch/mcp
+http://192.168.1.20:8000/servers/adder/mcp
 ```
 
 To add a stdio MCP tool, add one enabled `[[servers]]` entry with a unique
@@ -83,6 +84,8 @@ command = [
   "--project",
   "/path/to/custom_mcp_servers",
   "--no-sync",
+  "--with",
+  "mcp==1.29.0",
   "python",
   "-m",
   "custom_mcp_servers.servers.my_tool",
