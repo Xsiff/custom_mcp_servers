@@ -63,6 +63,35 @@ To add a stdio MCP tool, add one enabled `[[servers]]` entry with a unique
 name and explicit command to `config/servers.toml`; launcher code does not need
 to change.
 
+### Server integration structure
+
+The gateway and CLI are server-agnostic. Built-in direct-launch metadata lives
+in separate modules under `src/custom_mcp_servers/servers/`, each exporting a
+generic `ServerSpec`. Discovery loads those modules dynamically, so adding a
+new custom server does not require editing the core CLI or gateway.
+
+For a server implemented in this repository, keep its implementation in its
+own module or package and register its command in `config/servers.toml`:
+
+```toml
+[[servers]]
+name = "my-tool"
+enabled = true
+command = [
+  "uv",
+  "run",
+  "--project",
+  "/path/to/custom_mcp_servers",
+  "--no-sync",
+  "python",
+  "-m",
+  "custom_mcp_servers.servers.my_tool",
+]
+```
+
+The implementation must use MCP stdio transport, read protocol messages from
+stdin, write protocol messages to stdout, and send logs to stderr.
+
 ### Direct launcher command
 
 After `uv sync --dev`, use the project's launcher to start one server:

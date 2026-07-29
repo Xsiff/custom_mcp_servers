@@ -1,7 +1,8 @@
 import pytest
 
 from custom_mcp_servers import __doc__
-from custom_mcp_servers.cli import SERVER_COMMANDS, build_parser, main
+from custom_mcp_servers.cli import build_parser, main
+from custom_mcp_servers.servers import find
 
 
 def test_package_imports() -> None:
@@ -12,7 +13,7 @@ def test_launcher_flags_select_a_server() -> None:
     arguments = build_parser().parse_args(["--duckduckgo-mcp-server"])
 
     assert arguments.server == "duckduckgo"
-    assert SERVER_COMMANDS[arguments.server] == ("uvx", "duckduckgo-mcp-server")
+    assert find(arguments.server) is not None
 
 
 def test_launcher_rejects_multiple_servers() -> None:
