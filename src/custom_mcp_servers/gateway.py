@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import shlex
 import subprocess
+from urllib.parse import urlsplit, urlunsplit
 
 from .config import AppConfig
 
@@ -124,9 +125,10 @@ class Gateway:
                 )
                 await writer.drain()
                 return
+            public_path = urlsplit(path).path
             enabled_names = {s.name for s in self.config.servers if s.enabled}
             if not any(
-                path == f"/servers/{name}/mcp" for name in enabled_names
+                public_path == f"/servers/{name}/mcp" for name in enabled_names
             ):
                 writer.write(
                     _response(404, "Not Found", b"Unknown MCP endpoint\n")
@@ -166,7 +168,12 @@ class Gateway:
             ("Host", f"127.0.0.1:{self.config.gateway.proxy_port}")
         )
         forwarded_headers.append(("Connection", "close"))
-        request = f"{method} {path} HTTP/1.1\r\n".encode()
+        parsed_path = urlsplit(path)
+        internal_path = parsed_path.path.rstrip("/") + "/"
+        forward_path = urlunsplit(
+            ("", "", internal_path, parsed_path.query, parsed_path.fragment)
+        )
+        request = f"{method} {forward_path} HTTP/1.1\r\n".encode()
         request += b"".join(
             f"{key}: {value}\r\n".encode("latin-1")
             for key, value in forwarded_headers
