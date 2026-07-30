@@ -62,5 +62,10 @@ def test_config_rejects_missing_path(tmp_path: Path) -> None:
 def test_builtin_server_definitions_are_discovered() -> None:
     specs = discover()
 
-    assert {spec.name for spec in specs} == {"duckduckgo", "fetch", "time"}
+    assert {spec.name for spec in specs} == {
+        "adder",
+        "duckduckgo",
+        "fetch",
+        "time",
+    }
     assert all(spec.command for spec in specs)

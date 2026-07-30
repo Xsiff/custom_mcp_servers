@@ -104,9 +104,10 @@ uv run mcp --help
 uv run mcp --duckduckgo-mcp-server
 uv run mcp --mcp-server-time
 uv run mcp --mcp-server-fetch
+uv run mcp --adder
 ```
 
-Short aliases (`--duckduckgo`, `--time`, and `--fetch`) are also available.
+Short aliases (`--duckduckgo`, `--time`, `--fetch`, and `--adder`) are also available.
 Only one server can run per invocation because an MCP stdio server needs
 exclusive use of standard input and output.
 
@@ -116,7 +117,24 @@ To host a server on your LAN, supply both a host and port:
 uv run mcp --duckduckgo --host 0.0.0.0 --port 8000
 uv run mcp --time --host 0.0.0.0 --port 8001
 uv run mcp --fetch --host 0.0.0.0 --port 8002
+uv run mcp --adder --host 0.0.0.0 --port 8003
 ```
+
+To host multiple servers behind one gateway endpoint, select them with
+`--server-<name>` options:
+
+```bash
+uv run mcp --host 0.0.0.0 --port 8000 \
+  --allowed-host 192.168.1.20:8000 \
+  --allowed-origin http://192.168.1.10:3000 \
+  --allowed-origin http://localhost:3000 \
+  --server-duckduckgo \
+  --server-adder
+```
+
+The selected servers are available at `/servers/<name>/mcp`. Use
+`--proxy-port` to change the gateway's local proxy port. Repeat
+`--allowed-origin` or `--allowed-host` to allow additional values.
 
 DuckDuckGo uses its native Streamable HTTP mode. Time and fetch are stdio-only
 upstream, so the launcher uses an MCP 1.x-compatible local proxy to expose

@@ -6,7 +6,7 @@ import argparse
 import os
 from collections.abc import Sequence
 
-from .config import load_config
+from .config import AppConfig, GatewayConfig, ServerConfig, load_config
 from .gateway import run_gateway
 from .servers import discover, find
 
@@ -36,8 +36,22 @@ def build_parser() -> argparse.ArgumentParser:
             dest="server",
             help=spec.description,
         )
+    for spec in specs:
+        parser.add_argument(
+            f"--server-{spec.name}",
+            action="append_const",
+            const=spec.name,
+            dest="selected_servers",
+            help=f"include {spec.name} in a shared gateway",
+        )
     parser.add_argument("--host", help="direct server HTTP bind host")
     parser.add_argument("--port", type=int, help="direct server HTTP port")
+    parser.add_argument(
+        "--proxy-port",
+        type=int,
+        default=18000,
+        help="local gateway-to-server proxy port (default: 18000)",
+    )
     parser.add_argument(
         "--allowed-host", action="append", default=[], metavar="HOST[:PORT]"
     )
@@ -68,9 +82,39 @@ def _direct_command(
         parser.error(str(error))
 
 
+def _selected_config(
+    arguments: argparse.Namespace, parser: argparse.ArgumentParser
+) -> AppConfig:
+    if not arguments.selected_servers:
+        parser.error("select at least one --server-<name> option")
+    if arguments.host is None or arguments.port is None:
+        parser.error("shared server mode requires --host and --port")
+    if not 1 <= arguments.port <= 65535:
+        parser.error("--port must be between 1 and 65535")
+    if not 1 <= arguments.proxy_port <= 65535:
+        parser.error("--proxy-port must be between 1 and 65535")
+    selected = tuple(dict.fromkeys(arguments.selected_servers))
+    specs = {spec.name: spec for spec in discover()}
+    return AppConfig(
+        GatewayConfig(
+            arguments.host,
+            arguments.port,
+            arguments.proxy_port,
+            tuple(arguments.allowed_host),
+            tuple(arguments.allowed_origin),
+        ),
+        tuple(
+            ServerConfig(name, True, specs[name].command) for name in selected
+        ),
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = build_parser()
     arguments = parser.parse_args(argv)
+    if arguments.selected_servers:
+        run_gateway(_selected_config(arguments, parser))
+        return
     if arguments.command in {"list", "serve"}:
         try:
             config = load_config(arguments.config)

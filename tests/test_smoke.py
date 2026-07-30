@@ -16,6 +16,74 @@ def test_launcher_flags_select_a_server() -> None:
     assert find(arguments.server) is not None
 
 
+def test_launcher_can_select_the_in_repository_adder() -> None:
+    arguments = build_parser().parse_args(["--adder"])
+
+    assert arguments.server == "adder"
+    assert find(arguments.server) is not None
+
+
+def test_adder_launches_its_local_module(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    launched: list[str] = []
+
+    def fake_execvp(program: str, arguments: list[str]) -> None:
+        assert program == "uv"
+        launched.extend(arguments)
+
+    monkeypatch.setattr("custom_mcp_servers.cli.os.execvp", fake_execvp)
+
+    main(["--adder"])
+
+    assert launched == [
+        "uv",
+        "run",
+        "--project",
+        ".",
+        "--no-sync",
+        "--with",
+        "mcp==1.29.0",
+        "python",
+        "-m",
+        "custom_mcp_servers.servers.adder.server",
+    ]
+
+
+def test_server_selectors_build_a_shared_gateway(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured = []
+    monkeypatch.setattr(
+        "custom_mcp_servers.cli.run_gateway",
+        lambda config: captured.append(config),
+    )
+
+    main(
+        [
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8000",
+            "--allowed-host",
+            "192.168.1.20:8000",
+            "--allowed-origin",
+            "http://192.168.1.10:3000",
+            "--server-duckduckgo",
+            "--server-adder",
+        ]
+    )
+
+    assert len(captured) == 1
+    config = captured[0]
+    assert config.gateway.port == 8000
+    assert config.gateway.proxy_port == 18000
+    assert [server.name for server in config.servers] == [
+        "duckduckgo",
+        "adder",
+    ]
+
+
 def test_launcher_rejects_multiple_servers() -> None:
     parser = build_parser()
 
